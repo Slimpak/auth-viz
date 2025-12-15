@@ -32,13 +32,9 @@
     <!-- Main Content -->
     <div class="main-content">
       <div class="header-overlay">
-        <div class="header-left">
-          <h1>{{ scenarios[currentScenario].title }}</h1>
-          <p>{{ scenarios[currentScenario].desc }}</p>
-        </div>
-        <button @click="exportPositions" class="export-btn" title="Export node positions as JSON">
-          📋 Export Layout
-        </button>
+        <h1>{{ scenarios[currentScenario].title }}</h1>
+        <p>{{ scenarios[currentScenario].desc }}</p>
+        <button @click="exportState" class="export-btn">📋 Export Layout</button>
       </div>
 
       <VueFlow
@@ -140,7 +136,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted } from 'vue'
 import { VueFlow, Position, Handle, useVueFlow } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
@@ -150,7 +146,6 @@ import '@vue-flow/controls/dist/style.css'
 const { fitView } = useVueFlow()
 const currentScenario = ref<keyof typeof scenarios>('login')
 const elements = ref<any[]>([])
-let updateCount = 0
 
 const scenarios = {
   // --- SCENARIO 1: LOGIN ---
@@ -184,31 +179,31 @@ const scenarios = {
     desc: 'Before each request, check not only token presence but also its TTL. If token is missing OR TTL < 1/3 of lifetime - queue request, do preventive refresh, then execute.',
     data: [
       // Top row - flow start
-      { id: 'start', type: 'default', position: { x: 100, y: 50 }, label: 'Start useFetch()', class: 'tw-bg-blue-600 tw-text-white tw-border-none tw-rounded-full' },
-      { id: 'is_private', type: 'logic', position: { x: 100, y: 150 }, label: 'Is Private Route?' },
+      { id: 'start', type: 'default', position: { x: 214.61, y: 44.33 }, label: 'Start useFetch()', class: 'tw-bg-blue-600 tw-text-white tw-border-none tw-rounded-full' },
+      { id: 'is_private', type: 'logic', position: { x: 214.17, y: 148.70 }, label: 'Is Private Route?' },
       
       // Public API on the left
-      { id: 'public_req', type: 'api', position: { x: -150, y: 300 }, label: 'Public API' },
+      { id: 'public_req', type: 'api', position: { x: 222.35, y: 464.77 }, label: 'Public API' },
       
       // Central flow
-      { id: 'check_token', type: 'logic', position: { x: 350, y: 150 }, label: 'Has Token &<br>TTL > 1/3 Life?' },
+      { id: 'check_token', type: 'logic', position: { x: 397.69, y: 211.78 }, label: 'Has Token & TTL > 1/3 Life?' },
       
       // Happy path - direct execution (fresh token)
-      { id: 'do_req', type: 'api', position: { x: 650, y: 150 }, label: '🚀 Execute Request' },
-      { id: 'success', type: 'default', position: { x: 950, y: 150 }, label: '✅ Success', class: 'tw-bg-emerald-600 tw-text-white tw-border-none' },
+      { id: 'do_req', type: 'api', position: { x: 763.80, y: 265.97 }, label: '🚀 Execute Request' },
+      { id: 'success', type: 'default', position: { x: 1411.71, y: 232.37 }, label: '✅ Success', class: 'tw-bg-emerald-600 tw-text-white tw-border-none' },
       
       // Middle path - Promise Queue (unified for missing token OR low TTL)
-      { id: 'queue', type: 'queue', position: { x: 100, y: 430 }, label: 'Promise Queue' },
-      { id: 'promise_resolve', type: 'default', position: { x: 350, y: 430 }, label: 'Await Promise', class: 'tw-bg-purple-600 tw-text-white tw-border-none' },
-      { id: 'pre_refresh', type: 'api', position: { x: 550, y: 430 }, label: '🔄 Refresh Token' },
+      { id: 'queue', type: 'queue', position: { x: 511.62, y: 490.07 }, label: 'Promise Queue' },
+      { id: 'promise_resolve', type: 'default', position: { x: 519.37, y: 710.24 }, label: 'Await Promise', class: 'tw-bg-purple-600 tw-text-white tw-border-none' },
+      { id: 'pre_refresh', type: 'api', position: { x: 500.67, y: 779.61 }, label: '🔄 Refresh Token' },
       
       // Bottom path - 401 Queue (linear horizontal flow)
-      { id: 'check_401', type: 'logic', position: { x: 650, y: 430 }, label: 'Is 401 Error?' },
-      { id: 'queue_401', type: 'queue', position: { x: 900, y: 430 }, label: '401 Queue' },
-      { id: 'retry_refresh', type: 'api', position: { x: 1150, y: 430 }, label: '🔄 Retry Refresh' },
+      { id: 'check_401', type: 'logic', position: { x: 935.04, y: 393.15 }, label: 'Is 498 Error?' },
+      { id: 'queue_401', type: 'queue', position: { x: 872.90, y: 656.52 }, label: '498 Queue' },
+      { id: 'retry_refresh', type: 'api', position: { x: 1182.51, y: 682.53 }, label: '🔄 Retry Refresh' },
       
       // Bottom - Logout
-      { id: 'login', type: 'default', position: { x: 550, y: 750 }, label: '🚪 Logout', class: 'tw-bg-red-600 tw-text-white tw-border-none' },
+      { id: 'login', type: 'default', position: { x: 1347.99, y: 846.27 }, label: '🚪 Logout', class: 'tw-bg-red-600 tw-text-white tw-border-none' },
 
       // Edges
       { id: 'e1', source: 'start', target: 'is_private', animated: true },
@@ -233,7 +228,7 @@ const scenarios = {
       
       // 401 Queue path (linear horizontal)
       { id: 'e12', source: 'check_401', target: 'success', label: '200 OK', style: { stroke: '#10b981' }, type: 'step' },
-      { id: 'e13', source: 'check_401', target: 'queue_401', label: 'Yes (401)', style: { stroke: '#f87171', strokeWidth: 2 } },
+      { id: 'e13', source: 'check_401', target: 'queue_401', label: 'Yes (498)', style: { stroke: '#f87171', strokeWidth: 2 } },
       { id: 'e14', source: 'queue_401', target: 'retry_refresh', label: 'ONE Refresh', animated: true, style: { stroke: '#ec4899', strokeWidth: 3 } },
       { id: 'e15', source: 'retry_refresh', target: 'do_req', label: 'Retry', style: { stroke: '#60a5fa', strokeWidth: 2, strokeDasharray: '5,5' }, type: 'smoothstep' },
       { id: 'e16', source: 'retry_refresh', target: 'login', label: 'Fail', style: { stroke: '#f87171' }, type: 'smoothstep' }
@@ -356,7 +351,7 @@ const scenarios = {
       { id: 'api', type: 'api', position: { x: 300, y: 80 }, label: 'Resource API' },
 
       // Все получают 401
-      { id: 'all_401', type: 'default', position: { x: 550, y: 80 }, label: '⚠️ All 401', class: 'tw-bg-orange-600 tw-text-white tw-border-none tw-font-bold' },
+      { id: 'all_401', type: 'default', position: { x: 550, y: 80 }, label: '⚠️ All 498', class: 'tw-bg-orange-600 tw-text-white tw-border-none tw-font-bold' },
 
       // QUEUE - lock
       { id: 'queue', type: 'queue', position: { x: 300, y: 250 } },
@@ -392,64 +387,37 @@ const scenarios = {
   }
 }
 
-const exportPositions = () => {
-  updateCount++
-  const positions = elements.value
-    .filter((el: any) => el.position)
-    .map((el: any) => ({
-      id: el.id,
-      position: el.position
-    }))
-  
-  const json = JSON.stringify(positions, null, 2)
-  console.log(`%c[Export #${updateCount}] Current node positions:`, 'color: #60a5fa; font-weight: bold; font-size: 12px')
-  console.log(json)
-  console.log('%cℹ️ Copy the JSON above and send to assistant', 'color: #94a3b8')
-  console.log(`%c✅ Total updates: ${updateCount}`, 'color: #10b981')
-  
-  navigator.clipboard.writeText(json).then(() => {
-    alert('✅ Positions copied to clipboard!')
-  }).catch(() => {
-    alert('Check console (F12) for positions JSON')
-  })
-}
-
-// Watch for real-time position changes
-watch(
-  () => elements.value,
-  (newVal) => {
-    const movedNodes = newVal
-      .filter((el: any) => el.position)
-      .map((el: any) => `${el.id}(${el.position.x},${el.position.y})`)
-    
-    if (movedNodes.length > 0) {
-      console.log(`%c📍 Nodes detected:`, 'color: #a78bfa; font-size: 11px')
-      movedNodes.forEach(node => console.log(`  └─ ${node}`))
-    }
-  },
-  { deep: true }
-)
-
 const loadScenario = (key: keyof typeof scenarios) => {
   currentScenario.value = key
   elements.value = scenarios[key].data
-  console.log(`%c🎬 Loaded scenario: ${key}`, 'color: #fbbf24; font-weight: bold')
   setTimeout(() => fitView({ padding: 0.2, duration: 800 }), 50)
 }
 
+const exportState = () => {
+  const state = elements.value.map((node: any) => ({
+    id: node.id,
+    position: node.position,
+    ...(node.label && { label: node.label }),
+    ...(node.type && { type: node.type }),
+  }))
+  
+  const jsonStr = JSON.stringify(state, null, 2)
+  console.log('Exported state:', jsonStr)
+  
+  // Copy to clipboard
+  navigator.clipboard.writeText(jsonStr).then(() => {
+    alert('Layout JSON copied to clipboard! Check console for full output.')
+  }).catch(() => {
+    alert('Check browser console (F12) for JSON')
+  })
+}
+
 onMounted(() => {
-  console.log('%c🚀 Auth Viz initialized - Press F12 to open DevTools', 'color: #60a5fa; font-weight: bold; font-size: 14px')
-  console.log('%cℹ️ Move nodes around and click "📋 Export Layout" button to see positions', 'color: #94a3b8')
   loadScenario('login')
 })
 </script>
 
-<style>
-body {
-  margin: 0 !important;
-  padding: 0;
-}
-
+<style scoped>
 .page-wrapper {
   height: 100vh;
   width: 100%;
@@ -457,7 +425,9 @@ body {
   color: white;
   display: flex;
   overflow: hidden;
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: 'Inter', -apple-system, system-ui, sans-serif;
+  margin: 0;
+  padding: 0;
 }
 
 /* Sidebar */
@@ -612,14 +582,6 @@ body {
   left: 16px;
   z-index: 10;
   pointer-events: none;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  width: calc(100% - 32px);
-}
-
-.header-left {
-  pointer-events: none;
 }
 
 .header-overlay h1 {
@@ -631,15 +593,15 @@ body {
 
 .header-overlay p {
   color: #94a3b8;
-  margin: 0;
+  margin: 0 0 12px 0;
   font-size: 0.875rem;
 }
 
 .export-btn {
-  pointer-events: all;
+  pointer-events: auto;
   padding: 8px 16px;
-  background: rgba(59, 130, 246, 0.2);
-  border: 1px solid #3b82f6;
+  background: #1e293b;
+  border: 1px solid #334155;
   color: #60a5fa;
   border-radius: 6px;
   font-size: 0.875rem;
@@ -649,9 +611,9 @@ body {
 }
 
 .export-btn:hover {
-  background: rgba(59, 130, 246, 0.3);
-  border-color: #60a5fa;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+  background: #334155;
+  border-color: #475569;
+  box-shadow: 0 4px 12px rgba(96, 165, 250, 0.2);
 }
 
 .flow-canvas {

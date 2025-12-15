@@ -82,6 +82,8 @@ useHead({
   background: linear-gradient(135deg, #020617 0%, #0f172a 100%);
   color: #cbd5e1;
   padding: 2rem;
+  margin: 0;
+  font-family: 'Inter', -apple-system, system-ui, sans-serif;
 }
 
 .container {
