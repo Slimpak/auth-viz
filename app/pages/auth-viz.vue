@@ -189,7 +189,7 @@ const scenarios = {
       { id: 'check_token', type: 'logic', position: { x: 397.69, y: 211.78 }, label: 'Has Token & TTL > 1/3 Life?' },
       
       // Happy path - direct execution (fresh token)
-      { id: 'do_req', type: 'api', position: { x: 763.80, y: 265.97 }, label: '🚀 Execute Request' },
+      { id: 'do_req', type: 'api', position: { x: 763.80, y: 265.97 }, label: '🚀 Execute Request', class: 'execute-request-node' },
       { id: 'success', type: 'default', position: { x: 1411.71, y: 232.37 }, label: '✅ Success', class: 'tw-bg-emerald-600 tw-text-white tw-border-none' },
       
       // Middle path - Promise Queue (unified for missing token OR low TTL)
@@ -204,6 +204,7 @@ const scenarios = {
       
       // Bottom - Logout
       { id: 'login', type: 'default', position: { x: 1347.99, y: 846.27 }, label: '🚪 Logout', class: 'tw-bg-red-600 tw-text-white tw-border-none' },
+      { id: 'clear_api', type: 'api', position: { x: 1347.99, y: 950 }, label: 'POST /auth/logout' },
 
       // Edges
       { id: 'e1', source: 'start', target: 'is_private', animated: true },
@@ -227,11 +228,13 @@ const scenarios = {
       { id: 'e11', source: 'do_req', target: 'check_401', animated: true, style: { stroke: '#ec4899' }, type: 'step' },
       
       // 401 Queue path (linear horizontal)
-      { id: 'e12', source: 'check_401', target: 'success', label: '200 OK', style: { stroke: '#10b981' }, type: 'step' },
       { id: 'e13', source: 'check_401', target: 'queue_401', label: 'Yes (498)', style: { stroke: '#f87171', strokeWidth: 2 } },
       { id: 'e14', source: 'queue_401', target: 'retry_refresh', label: 'ONE Refresh', animated: true, style: { stroke: '#ec4899', strokeWidth: 3 } },
       { id: 'e15', source: 'retry_refresh', target: 'do_req', label: 'Retry', style: { stroke: '#60a5fa', strokeWidth: 2, strokeDasharray: '5,5' }, type: 'smoothstep' },
-      { id: 'e16', source: 'retry_refresh', target: 'login', label: 'Fail', style: { stroke: '#f87171' }, type: 'smoothstep' }
+      { id: 'e16', source: 'retry_refresh', target: 'login', label: 'Fail', style: { stroke: '#f87171' }, type: 'smoothstep' },
+      
+      // Logout path
+      { id: 'e17', source: 'login', target: 'clear_api', animated: true, style: { stroke: '#f87171', strokeWidth: 2 } }
     ]
   },
 
@@ -264,41 +267,43 @@ const scenarios = {
   ecosystem: {
     label: '4. Isolation',
     short: 'Host-Only Policy',
-    title: 'Ecosystem & Isolation',
-    desc: 'Each application stores its cookies separately. Even if Access Token is accessible to JS, it is available ONLY on its own domain.',
+    title: 'Ecosystem & No Isolation (Shared Cookies)',
+    desc: 'Cookies are shared by domain! If user logs in ONE tab - ALL tabs on same domain automatically see the login because they share the same cookie jar.',
     data: [
-      // APP 1
+      // APP 1 - Tab 1
       { 
-        id: 'explorer', type: 'client', position: { x: 0, y: 0 }, 
+        id: 'explorer_tab1', type: 'client', position: { x: 0, y: 0 }, 
         data: { 
-          url: 'explorer.app', 
-          access: '<span style="color: #34d399">Session A 🔓</span>',
-          refresh: '<span style="color: #60a5fa">Refresh A 🔒</span>'
+          url: 'explorer.app (Tab 1)',
+          access: '<span style="color: #34d399">Access Token 🔓</span>',
+          refresh: '<span style="color: #60a5fa">Refresh Token 🔒</span>'
         } 
       },
-      
-      // WALL
+
+      // SHARED COOKIES WARNING
       {
-        id: 'wall', type: 'default', position: { x: 20, y: 190 },
-        label: '⛔ HOST ISOLATION',
-        class: 'tw-bg-slate-900/50 tw-border-none tw-text-slate-500 tw-text-[10px] tw-font-bold',
-        style: { width: '250px', height: '40px', borderTop: '2px dashed #475569', borderBottom: '2px dashed #475569', display: 'flex', alignItems: 'center', justifyContent: 'center' }
+        id: 'shared_cookies', type: 'default', position: { x: 300, y: 50 },
+        label: '⚠️ SHARED COOKIES (by domain)',
+        class: 'tw-bg-orange-600/30 tw-border-orange-500 tw-text-orange-300 tw-text-[12px] tw-font-bold',
+        style: { width: '220px', height: '50px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #ea580c' }
       },
 
-      // APP 2
+      // APP 1 - Tab 2
       { 
-        id: 'hub', type: 'client', position: { x: 0, y: 250 }, 
+        id: 'explorer_tab2', type: 'client', position: { x: 600, y: 0 }, 
         data: { 
-          url: 'hub.app', 
-          access: '<span style="color: #34d399">Session B 🔓</span>',
-          refresh: '<span style="color: #60a5fa">Refresh B 🔒</span>'
+          url: 'explorer.app (Tab 2)',
+          access: '<span style="color: #34d399">Access Token 🔓</span>',
+          refresh: '<span style="color: #60a5fa">Refresh Token 🔒</span>'
         } 
       },
 
-      { id: 'auth', type: 'api', position: { x: 600, y: 125 }, label: 'Auth Service' },
+      { id: 'auth', type: 'api', position: { x: 300, y: 250 }, label: 'Auth Service' },
 
-      { id: 'e1', source: 'explorer', target: 'auth', label: 'Session A', animated: true, sourceHandle: 'refresh-out', style: { stroke: '#10b981' } },
-      { id: 'e2', source: 'hub', target: 'auth', label: 'Session B', animated: true, sourceHandle: 'refresh-out', style: { stroke: '#a78bfa' } },
+      { id: 'e1', source: 'explorer_tab1', target: 'auth', label: 'Login', animated: true, sourceHandle: 'refresh-out', style: { stroke: '#10b981' } },
+      { id: 'e2', source: 'auth', target: 'shared_cookies', label: 'Set-Cookie (Domain)', animated: true, style: { stroke: '#f97316', strokeWidth: 2 } },
+      { id: 'e3', source: 'shared_cookies', target: 'explorer_tab2', label: 'All Tabs See It!', animated: true, style: { stroke: '#f97316', strokeWidth: 2 } },
+      { id: 'e4', source: 'explorer_tab2', target: 'auth', label: 'Already Logged In!', animated: true, sourceHandle: 'refresh-out', style: { stroke: '#10b981' } },
     ]
   },
 
@@ -908,6 +913,13 @@ onMounted(() => {
 
 :deep(.vue-flow__attribution) {
   display: none;
+}
+
+:deep(.execute-request-node) {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(236, 72, 153, 0.2)) !important;
+  border: 2px solid #a855f7 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.3), inset 0 0 15px rgba(236, 72, 153, 0.15) !important;
 }
 
 @media (max-width: 768px) {
