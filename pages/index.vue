@@ -66,6 +66,8 @@
 </template>
 
 <script setup lang="ts">
+import { useHead } from '#app'
+
 useHead({
   title: 'CampOrganizer Auth v2 - Architecture Documentation',
   meta: [
@@ -78,7 +80,7 @@ useHead({
 .home-page {
   min-height: 100vh;
   background: linear-gradient(135deg, #020617 0%, #0f172a 100%);
-  color: white;
+  color: #cbd5e1;
   padding: 2rem;
 }
 
@@ -87,128 +89,142 @@ useHead({
   margin: 0 auto;
 }
 
-h1 {
-  font-size: 2.5rem;
-  font-weight: bold;
-  color: #2d3748;
-  margin-bottom: 1rem;
+.header {
   text-align: center;
+  margin-bottom: 4rem;
 }
 
-p {
-  font-size: 1.125rem;
-  color: #4a5568;
+.title {
+  font-size: 3rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 1rem;
+}
+
+.subtitle {
+  font-size: 1.25rem;
+  color: #94a3b8;
+}
+
+.content {
+  margin-bottom: 4rem;
+}
+
+.description {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
+}
+
+.description h2 {
+  font-size: 1.875rem;
+  color: #e2e8f0;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.description p {
+  font-size: 1.0625rem;
+  color: #cbd5e1;
+  max-width: 700px;
+  margin: 0 auto;
+  line-height: 1.6;
 }
 
 .features {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
 }
 
-.feature {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 15px;
+.feature-card {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
+  border: 1px solid #334155;
+  border-radius: 12px;
   padding: 2rem;
-  color: white;
-  transition: transform 0.3s ease;
-}
-
-.feature:hover {
-  transform: translateY(-5px);
-}
-
-.feature h2 {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-}
-
-.feature p {
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 1rem;
-  text-align: left;
-}
-
-.buttons {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.btn {
-  padding: 0.875rem 2rem;
-  font-size: 1rem;
-  font-weight: 600;
-  border-radius: 10px;
-  border: none;
-  cursor: pointer;
   transition: all 0.3s ease;
-  text-decoration: none;
-  display: inline-block;
   text-align: center;
 }
 
-.btn-primary {
-  background: #667eea;
+.feature-card:hover {
+  border-color: #475569;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(168, 85, 247, 0.15) 100%);
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.1);
+}
+
+.feature-card .icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.feature-card h3 {
+  font-size: 1.25rem;
+  color: #e2e8f0;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+
+.feature-card p {
+  color: #cbd5e1;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.cta-button {
+  display: inline-block;
+  padding: 1rem 2.5rem;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  margin-bottom: 4rem;
 }
 
-.btn-primary:hover {
-  background: #5568d3;
+.cta-button:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
   transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
-}
-
-.btn-secondary {
-  background: #e2e8f0;
-  color: #2d3748;
-}
-
-.btn-secondary:hover {
-  background: #cbd5e0;
-  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.4);
 }
 
 .footer {
+  text-align: center;
   padding-top: 2rem;
-  border-top: 2px solid #e2e8f0;
-  display: flex;
-  justify-content: center;
-  gap: 2rem;
-}
-
-.footer a {
-  color: #4a5568;
-  text-decoration: none;
+  border-top: 1px solid #334155;
+  color: #64748b;
   font-size: 0.875rem;
-  transition: color 0.3s ease;
 }
 
-.footer a:hover {
-  color: #667eea;
-}
-
-@media (max-width: 640px) {
-  .card {
-    padding: 2rem;
-  }
-  
-  h1 {
+@media (max-width: 768px) {
+  .title {
     font-size: 2rem;
   }
-  
-  .buttons {
-    flex-direction: column;
+
+  .subtitle {
+    font-size: 1rem;
   }
-  
-  .btn {
-    width: 100%;
+
+  .description h2 {
+    font-size: 1.5rem;
+  }
+
+  .features {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .cta-button {
+    display: block;
+    text-align: center;
   }
 }
 </style>
