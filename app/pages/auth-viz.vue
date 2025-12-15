@@ -142,7 +142,10 @@ import { Background } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
 import '@vue-flow/core/dist/style.css'
 import '@vue-flow/controls/dist/style.css'
+import { useRouter, useRoute } from 'vue-router'
 
+const router = useRouter()
+const route = useRoute()
 const { fitView } = useVueFlow()
 const currentScenario = ref<keyof typeof scenarios>('login')
 const elements = ref<any[]>([])
@@ -395,6 +398,7 @@ const scenarios = {
 const loadScenario = (key: keyof typeof scenarios) => {
   currentScenario.value = key
   elements.value = scenarios[key].data
+  router.push({ query: { scenario: key } })
   setTimeout(() => fitView({ padding: 0.2, duration: 800 }), 50)
 }
 
@@ -418,7 +422,12 @@ const exportState = () => {
 }
 
 onMounted(() => {
-  loadScenario('login')
+  const scenarioParam = route.query.scenario as keyof typeof scenarios
+  if (scenarioParam && scenarioParam in scenarios) {
+    loadScenario(scenarioParam)
+  } else {
+    loadScenario('login')
+  }
 })
 </script>
 
@@ -628,10 +637,33 @@ onMounted(() => {
 }
 
 :deep(.flow-controls) {
-  fill: white;
+  fill: #60a5fa;
   background: #1e293b;
   border: 1px solid #334155;
   border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+:deep(.flow-controls button) {
+  background: transparent;
+  border: none;
+  color: #60a5fa;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+:deep(.flow-controls button:hover) {
+  background: #334155;
+  color: #93c5fd;
+}
+
+:deep(.flow-controls svg) {
+  width: 20px;
+  height: 20px;
 }
 
 /* Node Styles */
